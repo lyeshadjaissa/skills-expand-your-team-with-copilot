@@ -476,6 +476,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
+    activityCard.id = `activity-${encodeURIComponent(name)}`;
 
     // Calculate spots and capacity
     const totalSpots = details.max_participants;
@@ -819,25 +820,33 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  // Build a deep-link URL for a specific activity using an anchor hash
+  function getActivityUrl(name) {
+    const base = window.location.origin + window.location.pathname;
+    return `${base}#activity-${encodeURIComponent(name)}`;
+  }
+
   // Share activity to Twitter/X
   function shareToTwitter(name, details) {
+    const activityUrl = getActivityUrl(name);
     const text = `Check out "${name}" at Mergington High School! ${details.description}`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(activityUrl)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
   // Share activity to WhatsApp
   function shareToWhatsApp(name, details) {
-    const text = `Check out "${name}" at Mergington High School!\n${details.description}\n${window.location.href}`;
+    const activityUrl = getActivityUrl(name);
+    const text = `Check out "${name}" at Mergington High School!\n${details.description}\n${activityUrl}`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
   // Copy activity link to clipboard
   async function copyActivityLink(name, button) {
-    const text = `Check out "${name}" at Mergington High School! ${window.location.href}`;
+    const activityUrl = getActivityUrl(name);
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(activityUrl);
       const originalText = button.textContent;
       button.textContent = "✓";
       button.classList.add("copied");
@@ -915,5 +924,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize app
   checkAuthentication();
   initializeFilters();
-  fetchActivities();
+  fetchActivities().then(() => {
+    // If the URL contains an activity anchor, scroll to it after loading
+    if (window.location.hash) {
+      const target = document.getElementById(window.location.hash.slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.add("highlight-card");
+        setTimeout(() => target.classList.remove("highlight-card"), 2000);
+      }
+    }
+  });
 });
