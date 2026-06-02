@@ -32,6 +32,26 @@
   --info-light: #d1ecf1;
 }
 
+body.dark-mode {
+  --primary: #283593;
+  --primary-light: #5f5fc4;
+  --primary-dark: #001064;
+  --secondary: #ff8f00;
+  --secondary-light: #ffc046;
+  --secondary-dark: #c56000;
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text-primary: #f1f1f1;
+  --text-secondary: #c5c5c5;
+  --border: #333333;
+  --border-light: #2a2a2a;
+  --border-focus: #4a4a4a;
+  --success-light: #1f3521;
+  --warning-light: #3a2e1c;
+  --error-light: #3c1f1f;
+  --info-light: #1c3337;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -626,6 +646,7 @@ footer {
 #user-status {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 #user-info {
@@ -648,6 +669,11 @@ footer {
   padding: 4px 12px;
   font-size: 0.85rem;
   transition: background-color 0.2s;
+}
+
+.icon-button:focus-visible {
+  outline: 2px solid var(--secondary-light);
+  outline-offset: 2px;
 }
 
 .icon-button:hover {
