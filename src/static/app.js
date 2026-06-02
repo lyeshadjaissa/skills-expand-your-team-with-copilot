@@ -537,6 +537,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
+    activityCard.id = `activity-${encodeURIComponent(name)}`;
 
     // Calculate spots and capacity
     const totalSpots = details.max_participants;
@@ -652,6 +653,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add share buttons row
+    const shareRow = document.createElement("div");
+    shareRow.className = "share-row";
+    shareRow.innerHTML = `
+      <span class="share-label" aria-hidden="true">Share:</span>
+      <button class="share-btn share-twitter" title="Share on X (Twitter)" aria-label="Share ${name} on X (Twitter)">𝕏</button>
+      <button class="share-btn share-whatsapp" title="Share on WhatsApp" aria-label="Share ${name} on WhatsApp">💬</button>
+      <button class="share-btn share-copy" title="Copy link" aria-label="Copy link for ${name}">🔗</button>
+    `;
+    shareRow.querySelector(".share-twitter").addEventListener("click", () => {
+      shareToTwitter(name, details);
+    });
+    shareRow.querySelector(".share-whatsapp").addEventListener("click", () => {
+      shareToWhatsApp(name, details);
+    });
+    shareRow.querySelector(".share-copy").addEventListener("click", (e) => {
+      copyActivityLink(name, e.currentTarget);
+    });
+    activityCard.appendChild(shareRow);
 
     activitiesList.appendChild(activityCard);
   }
@@ -884,6 +905,45 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  // Build a deep-link URL for a specific activity using an anchor hash
+  function getActivityUrl(name) {
+    const base = window.location.origin + window.location.pathname;
+    return `${base}#activity-${encodeURIComponent(name)}`;
+  }
+
+  // Share activity to Twitter/X
+  function shareToTwitter(name, details) {
+    const activityUrl = getActivityUrl(name);
+    const text = `Check out "${name}" at Mergington High School! ${details.description}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(activityUrl)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  // Share activity to WhatsApp
+  function shareToWhatsApp(name, details) {
+    const activityUrl = getActivityUrl(name);
+    const text = `Check out "${name}" at Mergington High School!\n${details.description}\n${activityUrl}`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  // Copy activity link to clipboard
+  async function copyActivityLink(name, button) {
+    const activityUrl = getActivityUrl(name);
+    try {
+      await navigator.clipboard.writeText(activityUrl);
+      const originalText = button.textContent;
+      button.textContent = "✓";
+      button.classList.add("copied");
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove("copied");
+      }, 2000);
+    } catch (err) {
+      showMessage("Could not copy the link. Try using your browser's copy function instead.", "error");
+    }
+  }
+
   // Show message function
   function showMessage(text, type) {
     messageDiv.textContent = text;
@@ -950,5 +1010,15 @@ document.addEventListener("DOMContentLoaded", () => {
   initializeTheme();
   checkAuthentication();
   initializeFilters();
-  fetchActivities();
+  fetchActivities().then(() => {
+    // If the URL contains an activity anchor, scroll to it after loading
+    if (window.location.hash) {
+      const target = document.getElementById(window.location.hash.slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.add("highlight-card");
+        setTimeout(() => target.classList.remove("highlight-card"), 2000);
+      }
+    }
+  });
 });

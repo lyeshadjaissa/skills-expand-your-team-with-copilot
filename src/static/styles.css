@@ -694,3 +694,55 @@ footer {
 #logout-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
 }
+
+/* Social sharing buttons */
+.share-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light);
+  margin-top: 8px;
+}
+
+.share-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-right: 2px;
+}
+
+.share-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.share-btn:hover {
+  background-color: var(--background);
+  border-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.share-btn.copied {
+  background-color: var(--success-light);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+/* Highlight animation when navigating to a shared activity link */
+@keyframes highlight-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(83, 75, 174, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(83, 75, 174, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(83, 75, 174, 0); }
+}
+
+.highlight-card {
+  animation: highlight-pulse 1.5s ease-out;
+  border-color: var(--primary-light);
+}
