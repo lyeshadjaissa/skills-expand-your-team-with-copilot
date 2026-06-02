@@ -587,6 +587,26 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add share buttons row
+    const shareRow = document.createElement("div");
+    shareRow.className = "share-row";
+    shareRow.innerHTML = `
+      <span class="share-label">Share:</span>
+      <button class="share-btn share-twitter" title="Share on X (Twitter)">𝕏</button>
+      <button class="share-btn share-whatsapp" title="Share on WhatsApp">💬</button>
+      <button class="share-btn share-copy" title="Copy link">🔗</button>
+    `;
+    shareRow.querySelector(".share-twitter").addEventListener("click", () => {
+      shareToTwitter(name, details);
+    });
+    shareRow.querySelector(".share-whatsapp").addEventListener("click", () => {
+      shareToWhatsApp(name, details);
+    });
+    shareRow.querySelector(".share-copy").addEventListener("click", (e) => {
+      copyActivityLink(name, e.currentTarget);
+    });
+    activityCard.appendChild(shareRow);
+
     activitiesList.appendChild(activityCard);
   }
 
@@ -797,6 +817,37 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     );
+  }
+
+  // Share activity to Twitter/X
+  function shareToTwitter(name, details) {
+    const text = `Check out "${name}" at Mergington High School! ${details.description}`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  // Share activity to WhatsApp
+  function shareToWhatsApp(name, details) {
+    const text = `Check out "${name}" at Mergington High School!\n${details.description}\n${window.location.href}`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
+  // Copy activity link to clipboard
+  async function copyActivityLink(name, button) {
+    const text = `Check out "${name}" at Mergington High School! ${window.location.href}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      const originalText = button.textContent;
+      button.textContent = "✓";
+      button.classList.add("copied");
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove("copied");
+      }, 2000);
+    } catch (err) {
+      showMessage("Unable to copy link. Please copy the URL manually.", "error");
+    }
   }
 
   // Show message function
