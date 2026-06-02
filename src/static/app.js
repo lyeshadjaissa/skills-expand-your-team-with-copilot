@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById("activity-search");
   const searchButton = document.getElementById("search-button");
   const categoryFilters = document.querySelectorAll(".category-filter");
+  const difficultyFilters = document.querySelectorAll(".difficulty-filter");
   const dayFilters = document.querySelectorAll(".day-filter");
   const timeFilters = document.querySelectorAll(".time-filter");
 
@@ -37,9 +38,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // State for activities and filters
   let allActivities = {};
   let currentFilter = "all";
+  let currentDifficultyFilter = "";
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
+  const difficultyLevels = new Set(["Beginner", "Intermediate", "Advanced"]);
 
   // Authentication state
   let currentUser = null;
@@ -363,6 +366,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return "academic";
   }
 
+  function getActivityDifficulty(details) {
+    if (difficultyLevels.has(details.difficulty)) {
+      return details.difficulty;
+    }
+
+    return null;
+  }
+
   // Function to fetch activities from API with optional day and time filters
   async function fetchActivities() {
     // Show loading skeletons first
@@ -419,9 +430,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     Object.entries(allActivities).forEach(([name, details]) => {
       const activityType = getActivityType(name, details.description);
+      const activityDifficulty = getActivityDifficulty(details);
 
       // Apply category filter
       if (currentFilter !== "all" && activityType !== currentFilter) {
+        return;
+      }
+
+      // Apply difficulty filter
+      if (currentDifficultyFilter === "all-levels" && activityDifficulty) {
+        return;
+      }
+
+      if (
+        currentDifficultyFilter &&
+        currentDifficultyFilter !== "all-levels" &&
+        activityDifficulty !== currentDifficultyFilter
+      ) {
         return;
       }
 
@@ -442,6 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
         name.toLowerCase(),
         details.description.toLowerCase(),
         formatSchedule(details).toLowerCase(),
+        activityDifficulty ? activityDifficulty.toLowerCase() : "",
       ].join(" ");
 
       if (
@@ -495,9 +521,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Determine activity type
     const activityType = getActivityType(name, details.description);
     const typeInfo = activityTypes[activityType];
+    const activityDifficulty = getActivityDifficulty(details);
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const difficultyHtml = activityDifficulty
+      ? `<p><strong>Difficulty:</strong> ${activityDifficulty}</p>`
+      : "";
 
     // Create activity tag
     const tagHtml = `
@@ -523,6 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ${tagHtml}
       <h4>${name}</h4>
       <p>${details.description}</p>
+      ${difficultyHtml}
       <p class="tooltip">
         <strong>Schedule:</strong> ${formattedSchedule}
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
@@ -611,6 +642,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Update current filter and display filtered activities
       currentFilter = button.dataset.category;
+      displayFilteredActivities();
+    });
+  });
+
+  // Add event listeners to day filter buttons
+  difficultyFilters.forEach((button) => {
+    button.addEventListener("click", () => {
+      const selectedDifficulty = button.dataset.difficulty;
+      const isAlreadyActive = button.classList.contains("active");
+
+      difficultyFilters.forEach((btn) => btn.classList.remove("active"));
+
+      if (isAlreadyActive) {
+        currentDifficultyFilter = "";
+      } else {
+        button.classList.add("active");
+        currentDifficultyFilter = selectedDifficulty;
+      }
+
       displayFilteredActivities();
     });
   });
