@@ -592,10 +592,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const shareRow = document.createElement("div");
     shareRow.className = "share-row";
     shareRow.innerHTML = `
-      <span class="share-label">Share:</span>
-      <button class="share-btn share-twitter" title="Share on X (Twitter)">𝕏</button>
-      <button class="share-btn share-whatsapp" title="Share on WhatsApp">💬</button>
-      <button class="share-btn share-copy" title="Copy link">🔗</button>
+      <span class="share-label" aria-hidden="true">Share:</span>
+      <button class="share-btn share-twitter" title="Share on X (Twitter)" aria-label="Share ${name} on X (Twitter)">𝕏</button>
+      <button class="share-btn share-whatsapp" title="Share on WhatsApp" aria-label="Share ${name} on WhatsApp">💬</button>
+      <button class="share-btn share-copy" title="Copy link" aria-label="Copy link for ${name}">🔗</button>
     `;
     shareRow.querySelector(".share-twitter").addEventListener("click", () => {
       shareToTwitter(name, details);
@@ -855,7 +855,7 @@ document.addEventListener("DOMContentLoaded", () => {
         button.classList.remove("copied");
       }, 2000);
     } catch (err) {
-      showMessage("Unable to copy link. Please copy the URL manually.", "error");
+      showMessage("Could not copy the link. Try using your browser's copy function instead.", "error");
     }
   }
 
